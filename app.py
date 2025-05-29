@@ -1,12 +1,166 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-import time # For simulating updates
-import numpy as np # Import numpy
+import plotly.graph_objects as go
+import time
+import numpy as np
+from datetime import datetime, timedelta
 
 # --- Configuration & Initial Data (Simulated) ---
-# Use the full page width
-st.set_page_config(layout="wide", page_title="AI Opportunity Map Dashboard")
+st.set_page_config(
+    layout="wide",
+    page_title="AI Opportunity Map Dashboard",
+    page_icon="🤖",
+    initial_sidebar_state="expanded"
+)
+
+# Custom CSS for modern styling
+st.markdown("""
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+    .stApp {
+        font-family: 'Inter', sans-serif;
+    }
+
+    .main-header {
+        font-size: 3.5rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-align: center;
+        margin-bottom: 2rem;
+        text-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .metric-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 1.5rem;
+        border-radius: 15px;
+        color: white;
+        text-align: center;
+        margin: 0.5rem 0;
+        box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .metric-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 40px rgba(102, 126, 234, 0.4);
+    }
+
+    .metric-card h3 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin: 0;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .metric-card p {
+        font-size: 0.9rem;
+        font-weight: 500;
+        margin: 0.5rem 0 0 0;
+        opacity: 0.9;
+    }
+
+    .trend-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-left: 4px solid #667eea;
+        padding: 1.5rem;
+        margin: 1rem 0;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        border: 1px solid rgba(102, 126, 234, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    .trend-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+        border-left-color: #764ba2;
+    }
+
+    .opportunity-highlight {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 15px;
+        margin: 1rem 0;
+        box-shadow: 0 8px 32px rgba(17, 153, 142, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transition: transform 0.3s ease;
+    }
+
+    .opportunity-highlight:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 40px rgba(17, 153, 142, 0.4);
+    }
+
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 8px;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 8px;
+        border-radius: 15px;
+        backdrop-filter: blur(10px);
+    }
+
+    .stTabs [data-baseweb="tab"] {
+        height: 55px;
+        padding: 0 24px;
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 12px;
+        border: 1px solid rgba(102, 126, 234, 0.2);
+        font-weight: 500;
+        transition: all 0.3s ease;
+        color: #333;
+    }
+
+    .stTabs [data-baseweb="tab"]:hover {
+        background: rgba(102, 126, 234, 0.1);
+        transform: translateY(-2px);
+    }
+
+    .stTabs [aria-selected="true"] {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+        transform: translateY(-2px);
+    }
+
+    .sidebar-section {
+        background: rgba(255, 255, 255, 0.05);
+        padding: 1rem;
+        border-radius: 10px;
+        margin: 1rem 0;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .feature-highlight {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        padding: 1.5rem;
+        border-radius: 15px;
+        border: 1px solid rgba(102, 126, 234, 0.2);
+        margin: 1rem 0;
+    }
+
+    .stats-container {
+        display: flex;
+        gap: 1rem;
+        margin: 1rem 0;
+    }
+
+    .glass-effect {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 15px;
+        padding: 1rem;
+    }
+</style>
+""", unsafe_allow_html=True)
 
 # Function to load initial trend data
 # In a real application, this data would come from a database, API, or external file.
@@ -78,17 +232,119 @@ def load_opportunity_data():
     return pd.DataFrame(data)
 
 # --- Dashboard Layout ---
-st.title("🌐 Dynamic AI Industry Opportunity Map")
+st.markdown('<h1 class="main-header">🤖 AI Opportunity Map 2025</h1>', unsafe_allow_html=True)
+
+# Hero section with enhanced metrics
 st.markdown("""
-Welcome to the AI Opportunity Map. This dashboard provides a conceptual overview of trends,
-opportunities, and strategic considerations in the rapidly evolving AI industry.
-*Data is illustrative and simulates dynamic updates when the button in the sidebar is clicked.*
+<div class="feature-highlight">
+    <h2 style="text-align: center; margin-bottom: 1rem; color: #333;">🎯 Strategic AI Intelligence Dashboard</h2>
+    <p style="text-align: center; font-size: 1.1rem; color: #666; margin-bottom: 0;">
+        Navigate the AI revolution with data-driven insights, trend analysis, and strategic decision-making tools
+    </p>
+</div>
+""", unsafe_allow_html=True)
+
+# Enhanced metrics with better readability
+col1, col2, col3, col4 = st.columns(4)
+
+with col1:
+    st.markdown("""
+    <div class="metric-card">
+        <h3>15+</h3>
+        <p>AI Trends Tracked</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col2:
+    st.markdown("""
+    <div class="metric-card">
+        <h3>8</h3>
+        <p>Investment Areas</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col3:
+    st.markdown("""
+    <div class="metric-card">
+        <h3>$2.6T</h3>
+        <p>Market Size 2030</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col4:
+    st.markdown("""
+    <div class="metric-card">
+        <h3>Real-time</h3>
+        <p>Data Insights</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+st.markdown("---")
+
+st.markdown("""
+### 🎯 **Strategic AI Intelligence Dashboard**
+
+Explore the dynamic landscape of artificial intelligence opportunities, trends, and strategic pathways.
+This interactive dashboard provides data-driven insights for businesses and individuals navigating the AI revolution.
+
+**🔥 Key Features:**
+- **Real-time Trend Analysis** - Track emerging AI patterns and their market impact
+- **Opportunity Mapping** - Identify high-potential investment and business areas
+- **Strategic Decision Trees** - Navigate complex AI adoption and career decisions
+- **Interactive Visualizations** - Explore data through modern, responsive charts
+
+*Data updates dynamically - use the sidebar controls to refresh insights.*
 """)
 
 # --- Sidebar for Controls ---
-st.sidebar.header("⚙️ Controls & Filters")
-st.sidebar.info("Future controls could include: Filter by industry, investment level, or specific technology.")
-update_button = st.sidebar.button("🔄 Simulate Data Update", help="Click to simulate fetching new data and updating the dashboard.")
+st.sidebar.markdown("## ⚙️ Dashboard Controls")
+
+# Data refresh section
+st.sidebar.markdown("### 🔄 Data Management")
+update_button = st.sidebar.button(
+    "🔄 Refresh Data",
+    help="Simulate fetching new data and updating the dashboard",
+    type="primary"
+)
+
+# Filters section
+st.sidebar.markdown("### 🎛️ Filters & Views")
+
+# Time horizon filter
+time_horizons = ["All", "Currently Dominant (Now - 1-2 Years)",
+                "Emerging & Growing (1-3 Years)", "Future Outlook (3-5+ Years)"]
+selected_horizon = st.sidebar.selectbox(
+    "Time Horizon Filter:",
+    time_horizons,
+    help="Filter trends by their time horizon"
+)
+
+# Impact score filter
+min_impact = st.sidebar.slider(
+    "Minimum Impact Score:",
+    min_value=1,
+    max_value=10,
+    value=1,
+    help="Show only trends with impact score above this threshold"
+)
+
+# Investment focus filter
+min_investment = st.sidebar.slider(
+    "Minimum Investment Focus:",
+    min_value=1,
+    max_value=10,
+    value=1,
+    help="Show only opportunities with investment focus above this threshold"
+)
+
+# Display options
+st.sidebar.markdown("### 📊 Display Options")
+show_descriptions = st.sidebar.checkbox("Show detailed descriptions", value=True)
+chart_theme = st.sidebar.selectbox(
+    "Chart Theme:",
+    ["plotly", "plotly_white", "plotly_dark", "ggplot2", "seaborn"],
+    index=1
+)
 
 # Initialize or load data into session state to persist across interactions
 if 'trends_df' not in st.session_state or 'opportunities_df' not in st.session_state:
@@ -119,30 +375,60 @@ if update_button:
         # However, if complex logic doesn't trigger a rerun, st.experimental_rerun() can be used.
 
 # --- Main Content Area with Tabs ---
-tab1, tab2, tab3 = st.tabs(["📈 Trend Timeline", "💡 Opportunity Sizing", "🌳 Strategy Decision Trees"])
+tab1, tab2, tab3, tab4 = st.tabs(["📈 Trend Analysis", "💡 Opportunity Map", "🌳 Strategy Trees", "📊 Analytics"])
 
 with tab1:
-    st.header("AI Industry Trend Timeline & Impact")
-    st.markdown("""
-    This section visualizes key AI industry trends, their perceived impact, and their current time horizon.
-    *In a fully developed dashboard, clicking on a trend could reveal detailed articles, data sources, or related opportunities.*
-    """)
+    st.header("🚀 AI Industry Trend Analysis")
 
-    # Visualization for Trends using Plotly Express
-    # Ensure the DataFrame is sorted by Impact_Score for better visualization if desired, or by Time_Horizon
-    # For example, to sort by Time_Horizon to group them:
-    # sorted_trends_df = st.session_state.trends_df.sort_values(by='Time_Horizon')
-    fig_trends = px.bar(
-        st.session_state.trends_df,
-        x='Trend',
-        y='Impact_Score',
-        color='Time_Horizon',
-        title="AI Industry Trends by Impact and Time Horizon",
-        labels={'Impact_Score': 'Perceived Impact Score (1-10)', 'Trend': 'Industry Trend'},
-        category_orders={"Time_Horizon": ["Currently Dominant (Now - 1-2 Years)", "Emerging & Growing (1-3 Years)", "Future Outlook (3-5+ Years)"]} # Ensures consistent order in legend
-    )
-    fig_trends.update_layout(xaxis_tickangle=-45, height=650, legend_title_text='Time Horizon')
-    st.plotly_chart(fig_trends, use_container_width=True)
+    # Apply filters to trends data
+    filtered_trends = st.session_state.trends_df.copy()
+
+    # Apply time horizon filter
+    if selected_horizon != "All":
+        filtered_trends = filtered_trends[filtered_trends['Time_Horizon'] == selected_horizon]
+
+    # Apply impact score filter
+    filtered_trends = filtered_trends[filtered_trends['Impact_Score'] >= min_impact]
+
+    if len(filtered_trends) == 0:
+        st.warning("No trends match the current filters. Please adjust your filter settings.")
+    else:
+        col1, col2 = st.columns([2, 1])
+
+        with col1:
+            st.markdown(f"""
+            **📊 Showing {len(filtered_trends)} of {len(st.session_state.trends_df)} trends**
+
+            Explore AI industry trends by their impact potential and timeline. Use the sidebar filters to focus on specific areas of interest.
+            """)
+
+        with col2:
+            avg_impact = filtered_trends['Impact_Score'].mean()
+            st.metric("Average Impact Score", f"{avg_impact:.1f}", f"{avg_impact - st.session_state.trends_df['Impact_Score'].mean():.1f}")
+
+        # Enhanced visualization with modern styling
+        fig_trends = px.bar(
+            filtered_trends,
+            x='Trend',
+            y='Impact_Score',
+            color='Time_Horizon',
+            title="AI Industry Trends by Impact and Time Horizon",
+            labels={'Impact_Score': 'Impact Score (1-10)', 'Trend': 'AI Trend'},
+            category_orders={"Time_Horizon": ["Currently Dominant (Now - 1-2 Years)", "Emerging & Growing (1-3 Years)", "Future Outlook (3-5+ Years)"]},
+            template=chart_theme,
+            color_discrete_sequence=['#667eea', '#764ba2', '#f093fb']
+        )
+
+        fig_trends.update_layout(
+            xaxis_tickangle=-45,
+            height=650,
+            legend_title_text='Time Horizon',
+            font=dict(size=12),
+            title_font_size=16,
+            showlegend=True
+        )
+
+        st.plotly_chart(fig_trends, use_container_width=True)
 
     st.subheader("🔍 Explore Trend Details")
     # Allow user to select a trend to see more details
@@ -158,24 +444,56 @@ with tab1:
         st.markdown(f"**Perceived Impact Score:** {trend_info['Impact_Score']:.2f}")
 
 with tab2:
-    st.header("AI Opportunity Sizing & Focus")
-    st.markdown("""
-    This section identifies potential opportunity areas based on current trends and a qualitative assessment of their size and investment focus.
-    *The 'Investment Focus Score' is a simulated metric. Actual market sizing requires dedicated research.*
-    """)
+    st.header("💰 AI Opportunity Landscape")
 
-    # Treemap visualization for Opportunities
-    fig_ops = px.treemap(
-        st.session_state.opportunities_df,
-        path=[px.Constant("All AI Opportunities"), 'Qualitative_Size', 'Opportunity_Area'], # Defines the hierarchy
-        values='Investment_Focus_Score',
-        color='Investment_Focus_Score',
-        color_continuous_scale='viridis', # Using a different color scale
-        title="AI Opportunity Areas by Qualitative Size and Investment Focus Score",
-        hover_data={'Related_Trends': True} # Show related trends on hover
-    )
-    fig_ops.update_layout(height=700, margin = dict(t=50, l=25, r=25, b=25))
-    st.plotly_chart(fig_ops, use_container_width=True)
+    # Apply filters to opportunities data
+    filtered_opportunities = st.session_state.opportunities_df.copy()
+    filtered_opportunities = filtered_opportunities[filtered_opportunities['Investment_Focus_Score'] >= min_investment]
+
+    if len(filtered_opportunities) == 0:
+        st.warning("No opportunities match the current filters. Please adjust your filter settings.")
+    else:
+        col1, col2, col3 = st.columns(3)
+
+        with col1:
+            total_opportunities = len(filtered_opportunities)
+            st.metric("Opportunities", total_opportunities, f"{total_opportunities - len(st.session_state.opportunities_df)}")
+
+        with col2:
+            avg_focus = filtered_opportunities['Investment_Focus_Score'].mean()
+            st.metric("Avg Investment Focus", f"{avg_focus:.1f}", f"{avg_focus - st.session_state.opportunities_df['Investment_Focus_Score'].mean():.1f}")
+
+        with col3:
+            high_focus_count = len(filtered_opportunities[filtered_opportunities['Investment_Focus_Score'] >= 8])
+            st.metric("High-Focus Areas", high_focus_count, f"{high_focus_count}/{total_opportunities}")
+
+        st.markdown("""
+        **🎯 Strategic Opportunity Analysis**
+
+        Explore high-potential AI business areas based on market trends, investment focus, and growth potential.
+        The treemap visualization shows relative opportunity sizes and investment attractiveness.
+        """)
+
+        # Enhanced treemap visualization
+        fig_ops = px.treemap(
+            filtered_opportunities,
+            path=[px.Constant("AI Opportunities"), 'Qualitative_Size', 'Opportunity_Area'],
+            values='Investment_Focus_Score',
+            color='Investment_Focus_Score',
+            color_continuous_scale='RdYlBu_r',
+            title="AI Opportunity Areas by Size and Investment Focus",
+            hover_data={'Related_Trends': True},
+            template=chart_theme
+        )
+
+        fig_ops.update_layout(
+            height=700,
+            margin=dict(t=50, l=25, r=25, b=25),
+            font=dict(size=12),
+            title_font_size=16
+        )
+
+        st.plotly_chart(fig_ops, use_container_width=True)
 
     st.subheader("🔍 Explore Opportunity Details")
     selected_opportunity = st.selectbox(
@@ -315,9 +633,97 @@ with tab3:
     st.graphviz_chart(individual_strategy_dot)
     st.info("ℹ️ Clicking paths like 'AI Builder' could link to relevant skilling platforms (from Opportunities) or highlight 'Continuous Learning' (from Trends).")
 
-# --- Footer Information in Sidebar ---
+with tab4:
+    st.header("📊 Advanced Analytics")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.subheader("📈 Trend Impact Distribution")
+
+        # Create impact distribution chart
+        impact_counts = st.session_state.trends_df['Impact_Score'].value_counts().sort_index()
+        fig_impact = px.bar(
+            x=impact_counts.index,
+            y=impact_counts.values,
+            title="Distribution of Impact Scores",
+            labels={'x': 'Impact Score', 'y': 'Number of Trends'},
+            template=chart_theme,
+            color=impact_counts.values,
+            color_continuous_scale='Blues'
+        )
+        fig_impact.update_layout(height=400, showlegend=False)
+        st.plotly_chart(fig_impact, use_container_width=True)
+
+        # Time horizon breakdown
+        st.subheader("⏰ Time Horizon Analysis")
+        horizon_counts = st.session_state.trends_df['Time_Horizon'].value_counts()
+        fig_horizon = px.pie(
+            values=horizon_counts.values,
+            names=horizon_counts.index,
+            title="Trends by Time Horizon",
+            template=chart_theme,
+            color_discrete_sequence=['#667eea', '#764ba2', '#f093fb']
+        )
+        fig_horizon.update_layout(height=400)
+        st.plotly_chart(fig_horizon, use_container_width=True)
+
+    with col2:
+        st.subheader("💰 Investment Focus Analysis")
+
+        # Investment focus vs qualitative size
+        fig_scatter = px.scatter(
+            st.session_state.opportunities_df,
+            x='Investment_Focus_Score',
+            y='Qualitative_Size',
+            size='Investment_Focus_Score',
+            color='Investment_Focus_Score',
+            hover_name='Opportunity_Area',
+            title="Investment Focus vs Market Size",
+            template=chart_theme,
+            color_continuous_scale='RdYlBu_r'
+        )
+        fig_scatter.update_layout(height=400)
+        st.plotly_chart(fig_scatter, use_container_width=True)
+
+        # Top opportunities
+        st.subheader("🏆 Top Investment Opportunities")
+        top_opportunities = st.session_state.opportunities_df.nlargest(5, 'Investment_Focus_Score')
+
+        for idx, row in top_opportunities.iterrows():
+            st.markdown(f"""
+            <div class="opportunity-highlight">
+                <h4>{row['Opportunity_Area']}</h4>
+                <p><strong>Focus Score:</strong> {row['Investment_Focus_Score']}/10</p>
+                <p><strong>Market Size:</strong> {row['Qualitative_Size']}</p>
+            </div>
+            """, unsafe_allow_html=True)
+
+# --- Enhanced Footer Information in Sidebar ---
 st.sidebar.markdown("---")
-st.sidebar.markdown("📊 **Dashboard Information**")
-st.sidebar.markdown(f"Last Simulated Update: `{st.session_state.last_update_time}`")
-st.sidebar.markdown("Source Data: Simulated based on user-provided industry insights.")
-st.sidebar.markdown("Developed using [Streamlit](https://streamlit.io).")
+st.sidebar.markdown("""
+<div class="sidebar-section">
+    <h3>📊 Dashboard Statistics</h3>
+    <p><strong>Last Update:</strong> <code>{}</code></p>
+    <p><strong>Trends Analyzed:</strong> {}</p>
+    <p><strong>Opportunities Mapped:</strong> {}</p>
+</div>
+""".format(st.session_state.last_update_time, len(st.session_state.trends_df), len(st.session_state.opportunities_df)), unsafe_allow_html=True)
+
+st.sidebar.markdown("---")
+st.sidebar.markdown("""
+<div class="sidebar-section">
+    <h3>👨‍💻 Developer</h3>
+    <p><strong>Created by:</strong> Easin Arafat</p>
+    <p><strong>GitHub:</strong> <a href="https://github.com/mrx-arafat" target="_blank">@mrx-arafat</a></p>
+    <p><strong>Repository:</strong> <a href="https://github.com/mrx-arafat/AI-Opportunity-Map" target="_blank">AI-Opportunity-Map</a></p>
+</div>
+""", unsafe_allow_html=True)
+
+st.sidebar.markdown("---")
+st.sidebar.markdown("""
+<div style="text-align: center; padding: 1rem;">
+    <p><strong>Built with ❤️ using Streamlit</strong></p>
+    <p style="font-size: 0.8rem; opacity: 0.7;"><em>Data is simulated for demonstration purposes</em></p>
+</div>
+""", unsafe_allow_html=True)
