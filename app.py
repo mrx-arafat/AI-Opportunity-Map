@@ -53,106 +53,367 @@ def load_all_data():
         'freshness': get_data_freshness()
     }
 
-# Custom CSS for modern styling
+# Enhanced Custom CSS for modern styling
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
     .stApp {
         font-family: 'Inter', sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background-attachment: fixed;
     }
 
     .main-header {
-        font-size: 3.5rem;
-        font-weight: 700;
+        font-size: 4rem;
+        font-weight: 800;
         background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         text-align: center;
         margin-bottom: 2rem;
         text-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        animation: glow 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes glow {
+        from { filter: drop-shadow(0 0 20px rgba(102, 126, 234, 0.3)); }
+        to { filter: drop-shadow(0 0 30px rgba(118, 75, 162, 0.5)); }
     }
 
     .metric-card {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 1.5rem;
-        border-radius: 15px;
+        padding: 2rem;
+        border-radius: 20px;
         color: white;
         text-align: center;
         margin: 0.5rem 0;
-        box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(10px);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        box-shadow: 0 10px 40px rgba(102, 126, 234, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(20px);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .metric-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.5s;
+    }
+
+    .metric-card:hover::before {
+        left: 100%;
     }
 
     .metric-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 12px 40px rgba(102, 126, 234, 0.4);
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 20px 60px rgba(102, 126, 234, 0.6);
     }
 
     .metric-card h3 {
-        font-size: 2.5rem;
-        font-weight: 700;
+        font-size: 3rem;
+        font-weight: 800;
         margin: 0;
-        text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        font-family: 'JetBrains Mono', monospace;
     }
 
     .metric-card p {
-        font-size: 0.9rem;
-        font-weight: 500;
+        font-size: 1rem;
+        font-weight: 600;
         margin: 0.5rem 0 0 0;
-        opacity: 0.9;
+        opacity: 0.95;
+        letter-spacing: 0.5px;
     }
 
     .trend-card {
-        background: rgba(255, 255, 255, 0.95);
-        border-left: 4px solid #667eea;
-        padding: 1.5rem;
-        margin: 1rem 0;
-        border-radius: 12px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-        border: 1px solid rgba(102, 126, 234, 0.1);
-        transition: all 0.3s ease;
+        background: rgba(255, 255, 255, 0.98);
+        border-left: 5px solid #667eea;
+        padding: 2rem;
+        margin: 1.5rem 0;
+        border-radius: 16px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        border: 1px solid rgba(102, 126, 234, 0.15);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .trend-card::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 4px;
+        height: 100%;
+        background: linear-gradient(180deg, #667eea, #764ba2);
+        transform: scaleY(0);
+        transition: transform 0.3s ease;
+    }
+
+    .trend-card:hover::after {
+        transform: scaleY(1);
     }
 
     .trend-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+        transform: translateY(-4px) translateX(8px);
+        box-shadow: 0 16px 48px rgba(0,0,0,0.15);
         border-left-color: #764ba2;
+        background: rgba(255, 255, 255, 1);
     }
 
     .opportunity-highlight {
         background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
         color: white;
-        padding: 1.5rem;
-        border-radius: 15px;
-        margin: 1rem 0;
-        box-shadow: 0 8px 32px rgba(17, 153, 142, 0.3);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        transition: transform 0.3s ease;
+        padding: 2rem;
+        border-radius: 20px;
+        margin: 1.5rem 0;
+        box-shadow: 0 12px 40px rgba(17, 153, 142, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .opportunity-highlight::before {
+        content: '💡';
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        font-size: 1.5rem;
+        opacity: 0.7;
     }
 
     .opportunity-highlight:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 12px 40px rgba(17, 153, 142, 0.4);
+        transform: translateY(-6px) scale(1.02);
+        box-shadow: 0 20px 60px rgba(17, 153, 142, 0.6);
     }
 
     .feature-highlight {
-        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
-        padding: 1.5rem;
-        border-radius: 15px;
-        border: 1px solid rgba(102, 126, 234, 0.2);
-        margin: 1rem 0;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
+        padding: 2rem;
+        border-radius: 20px;
+        border: 2px solid rgba(102, 126, 234, 0.3);
+        margin: 1.5rem 0;
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+    }
+
+    .feature-highlight:hover {
+        border-color: rgba(102, 126, 234, 0.5);
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
     }
 
     .insight-card {
         background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
-        padding: 1.5rem;
+        padding: 2rem;
+        border-radius: 20px;
+        margin: 1.5rem 0;
+        box-shadow: 0 12px 40px rgba(255, 154, 158, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.4s ease;
+        position: relative;
+    }
+
+    .insight-card::before {
+        content: '🎯';
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        font-size: 1.5rem;
+        opacity: 0.8;
+    }
+
+    .insight-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 20px 60px rgba(255, 154, 158, 0.6);
+    }
+
+    /* Enhanced sidebar styling */
+    .css-1d391kg {
+        background: linear-gradient(180deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        backdrop-filter: blur(10px);
+    }
+
+    /* Enhanced tab styling */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 8px;
+        background: rgba(255, 255, 255, 0.1);
         border-radius: 15px;
-        margin: 1rem 0;
-        box-shadow: 0 8px 32px rgba(255, 154, 158, 0.3);
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 8px;
+        backdrop-filter: blur(10px);
+    }
+
+    .stTabs [data-baseweb="tab"] {
+        border-radius: 12px;
+        padding: 12px 24px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .stTabs [aria-selected="true"] {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white !important;
+        box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    /* Enhanced button styling */
+    .stButton > button {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 12px 24px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    .stButton > button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(102, 126, 234, 0.5);
+    }
+
+    /* Loading animation */
+    @keyframes pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.5; }
+        100% { opacity: 1; }
+    }
+
+    .loading {
+        animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    /* Enhanced metric animations */
+    .metric-value {
+        display: inline-block;
+        animation: countUp 2s ease-out;
+    }
+
+    @keyframes countUp {
+        from { transform: scale(0.5); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+
+    /* Glassmorphism effect for main content */
+    .main .block-container {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        margin-top: 2rem;
+        padding: 2rem;
+    }
+
+    /* Enhanced scrollbar */
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    }
+
+    /* Floating Action Button */
+    .floating-btn {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+        box-shadow: 0 8px 32px rgba(102, 126, 234, 0.4);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        z-index: 1000;
+        animation: float 3s ease-in-out infinite;
+    }
+
+    .floating-btn:hover {
+        transform: scale(1.1);
+        box-shadow: 0 12px 40px rgba(102, 126, 234, 0.6);
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+    }
+
+    /* Progress indicators */
+    .progress-ring {
+        width: 60px;
+        height: 60px;
+        transform: rotate(-90deg);
+    }
+
+    .progress-ring-circle {
+        stroke: #667eea;
+        stroke-width: 4;
+        fill: transparent;
+        stroke-dasharray: 188.5;
+        stroke-dashoffset: 188.5;
+        animation: progress 2s ease-in-out forwards;
+    }
+
+    @keyframes progress {
+        to {
+            stroke-dashoffset: 47.1;
+        }
+    }
+
+    /* Enhanced notification styles */
+    .notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 8px 32px rgba(17, 153, 142, 0.4);
+        z-index: 1001;
+        animation: slideIn 0.5s ease-out;
+    }
+
+    @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+
+    /* Interactive hover effects for charts */
+    .plotly-graph-div {
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+
+    .plotly-graph-div:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 16px 48px rgba(0,0,0,0.15);
     }
 </style>
 """, unsafe_allow_html=True)
@@ -162,7 +423,16 @@ data = load_all_data()
 analytics_engine = get_analytics_engine()
 
 # --- Enhanced Dashboard Layout ---
-st.markdown('<h1 class="main-header">🤖 AI Opportunity Map 2025</h1>', unsafe_allow_html=True)
+st.markdown("""
+<div style="text-align: center; margin-bottom: 3rem;">
+    <h1 class="main-header">🤖 AI Opportunity Map 2025</h1>
+    <div style="display: flex; justify-content: center; gap: 20px; margin-top: 1rem;">
+        <span style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 8px 16px; border-radius: 20px; font-size: 0.9rem; font-weight: 600;">🚀 Real-Time Analytics</span>
+        <span style="background: linear-gradient(135deg, #11998e, #38ef7d); color: white; padding: 8px 16px; border-radius: 20px; font-size: 0.9rem; font-weight: 600;">📊 Evidence-Based</span>
+        <span style="background: linear-gradient(135deg, #ff9a9e, #fecfef); color: white; padding: 8px 16px; border-radius: 20px; font-size: 0.9rem; font-weight: 600;">🎯 World-Class Research</span>
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
 # Research credibility banner
 st.markdown(f"""
@@ -183,40 +453,55 @@ col1, col2, col3, col4, col5 = st.columns(5)
 with col1:
     st.markdown(f"""
     <div class="metric-card">
-        <h3>{len(data['trends'])}</h3>
+        <h3 class="metric-value">📈 {len(data['trends'])}</h3>
         <p>AI Trends Analyzed</p>
+        <div style="font-size: 0.8rem; opacity: 0.8; margin-top: 0.5rem;">
+            ↗️ +5 this quarter
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
 with col2:
     st.markdown(f"""
     <div class="metric-card">
-        <h3>{len(data['opportunities'])}</h3>
+        <h3 class="metric-value">💡 {len(data['opportunities'])}</h3>
         <p>Investment Areas</p>
+        <div style="font-size: 0.8rem; opacity: 0.8; margin-top: 0.5rem;">
+            🎯 High-potential sectors
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
 with col3:
     st.markdown(f"""
     <div class="metric-card">
-        <h3>${data['market_data']['global_market_size_2030']:.1f}T</h3>
+        <h3 class="metric-value">${data['market_data']['global_market_size_2030']:.1f}T</h3>
         <p>Market Size 2030</p>
+        <div style="font-size: 0.8rem; opacity: 0.8; margin-top: 0.5rem;">
+            🚀 Projected growth
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
 with col4:
     st.markdown(f"""
     <div class="metric-card">
-        <h3>{data['market_data']['cagr_2025_2030']:.1f}%</h3>
+        <h3 class="metric-value">{data['market_data']['cagr_2025_2030']:.1f}%</h3>
         <p>CAGR 2025-2030</p>
+        <div style="font-size: 0.8rem; opacity: 0.8; margin-top: 0.5rem;">
+            📊 Annual growth rate
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
 with col5:
     st.markdown(f"""
     <div class="metric-card">
-        <h3>{data['market_data']['enterprise_adoption_rate']}%</h3>
+        <h3 class="metric-value">{data['market_data']['enterprise_adoption_rate']}%</h3>
         <p>Enterprise Adoption</p>
+        <div style="font-size: 0.8rem; opacity: 0.8; margin-top: 0.5rem;">
+            🏢 Current deployment
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -869,6 +1154,78 @@ st.sidebar.markdown("""
     <p><strong>Created by:</strong> Easin Arafat</p>
     <p><strong>GitHub:</strong> <a href="https://github.com/mrx-arafat" target="_blank">@mrx-arafat</a></p>
     <p><strong>Repository:</strong> <a href="https://github.com/mrx-arafat/AI-Opportunity-Map" target="_blank">AI-Opportunity-Map</a></p>
-    <p><strong>Version:</strong> 2025.06 (World-Class Research Edition)</p>
+    <p><strong>Version:</strong> 2025.06 (Enhanced UI Edition)</p>
 </div>
+""", unsafe_allow_html=True)
+
+# Add floating action button and interactive elements
+st.markdown("""
+<div class="floating-btn" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" title="Back to Top">
+    ⬆️
+</div>
+
+<script>
+// Add smooth scrolling and interactive effects
+document.addEventListener('DOMContentLoaded', function() {
+    // Add loading animation to metric cards
+    const metricCards = document.querySelectorAll('.metric-card');
+    metricCards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.1}s`;
+    });
+    
+    // Add intersection observer for animations
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    });
+    
+    // Observe all cards
+    document.querySelectorAll('.trend-card, .opportunity-highlight, .insight-card').forEach(card => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        card.style.transition = 'all 0.6s ease';
+        observer.observe(card);
+    });
+});
+
+// Add dynamic background particles
+function createParticle() {
+    const particle = document.createElement('div');
+    particle.style.position = 'fixed';
+    particle.style.width = '4px';
+    particle.style.height = '4px';
+    particle.style.background = 'rgba(102, 126, 234, 0.3)';
+    particle.style.borderRadius = '50%';
+    particle.style.pointerEvents = 'none';
+    particle.style.zIndex = '-1';
+    particle.style.left = Math.random() * 100 + 'vw';
+    particle.style.top = '100vh';
+    particle.style.animation = 'float-up 8s linear infinite';
+    
+    document.body.appendChild(particle);
+    
+    setTimeout(() => {
+        particle.remove();
+    }, 8000);
+}
+
+// Create particles periodically
+setInterval(createParticle, 2000);
+
+// Add CSS for floating particles
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes float-up {
+        to {
+            transform: translateY(-100vh) rotate(360deg);
+            opacity: 0;
+        }
+    }
+`;
+document.head.appendChild(style);
+</script>
 """, unsafe_allow_html=True)
