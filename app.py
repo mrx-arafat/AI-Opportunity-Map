@@ -328,23 +328,23 @@ st.markdown("""
 
     /* Buttons */
     .stButton > button {
-        background: var(--accent);
-        color: #1f2937;
-        border: 1px solid var(--accent);
-        border-radius: 12px;
-        padding: 10px 18px;
-        font-weight: 700;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-        box-shadow: var(--shadow-1);
+        background: var(--accent) !important;
+        color: #1f2937 !important;
+        border: 1px solid var(--accent) !important;
+        border-radius: 12px !important;
+        padding: 10px 18px !important;
+        font-weight: 700 !important;
+        transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+        box-shadow: var(--shadow-1) !important;
     }
     section[data-testid="stSidebar"] .stButton > button {
-        width: 100%;
-        background: var(--accent);
-        color: #1f2937;
-        border: 1px solid var(--accent);
+        width: 100% !important;
+        background: var(--accent) !important;
+        color: #1f2937 !important;
+        border: 1px solid var(--accent) !important;
     }
     section[data-testid="stSidebar"] .stButton > button:hover {
-        filter: brightness(0.95);
+        filter: brightness(0.95) !important;
     }
 
     .stButton > button:hover {
