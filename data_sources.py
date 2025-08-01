@@ -371,7 +371,7 @@ RESEARCH_SOURCES = {
         "Harvard Business Review AI Strategy Reports",
         "Accenture AI Transformation Studies"
     ],
-    'last_updated': "June 2025",
+    'last_updated': "August 2025",
     'methodology': "Comprehensive analysis of 50+ research reports, surveys of 10,000+ enterprises, and expert interviews with industry leaders."
 }
 
@@ -379,7 +379,7 @@ def get_data_freshness():
     """Returns data freshness information."""
     return {
         'last_update': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-        'data_vintage': 'June 2025',
+        'data_vintage': 'August 2025',
         'next_update': (datetime.now() + timedelta(days=30)).strftime('%Y-%m-%d'),
         'confidence_level': '95%',
         'sample_size': '10,000+ enterprises globally'
